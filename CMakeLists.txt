@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
+project(example-app)
+
+find_package(Torch REQUIRED)
+find_package(OpenCV REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+
+add_executable(example-app torch.cpp)
+target_link_libraries(example-app "${TORCH_LIBRARIES}" ${OpenCV_LIBS})
+set_property(TARGET example-app PROPERTY CXX_STANDARD 17)
+
+
+if (MSVC)
+  file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
+  add_custom_command(TARGET example-app
+                     POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                     ${TORCH_DLLS}
+                     $<TARGET_FILE_DIR:example-app>)
+endif (MSVC)
